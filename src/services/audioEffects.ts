@@ -64,6 +64,10 @@ class SoundFX {
     });
   }
 
+  playApproval() {
+    this.playAuthorize();
+  }
+
   // Action Denied (Security buzz / low rejection tone)
   playDeny() {
     const ctx = this.getContext();
@@ -83,6 +87,10 @@ class SoundFX {
     gain.connect(ctx.destination);
     osc.start(now);
     osc.stop(now + 0.28);
+  }
+
+  playRejection() {
+    this.playDeny();
   }
 
   // Camera Shutter Snap

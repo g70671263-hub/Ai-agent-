@@ -18,7 +18,6 @@ import {
   UploadCloud,
   Maximize2,
   Sparkles,
-  Bluetooth,
 } from 'lucide-react';
 import { PhoneFrame } from './components/PhoneSimulator/PhoneFrame';
 import { MultimodalInput } from './components/Commander/MultimodalInput';
@@ -27,13 +26,12 @@ import { ActionTimeline } from './components/Commander/ActionTimeline';
 import { QuickActionPresets } from './components/Commander/QuickActionPresets';
 import { AuditLogModal } from './components/Commander/AuditLogModal';
 import { AIBrainModal, AI_BRAIN_MODELS } from './components/BrainCenter/AIBrainModal';
-import { RealMobileModal } from './components/MobilePairing/RealMobileModal';
-import { BluetoothModal } from './components/Bluetooth/BluetoothModal';
+import { DirectMobileModal } from './components/MobilePairing/DirectMobileModal';
 import { DeployModal } from './components/Deployment/DeployModal';
 import { requestActionPlan, fetchServerStatus } from './services/api';
 import { soundFX } from './services/audioEffects';
 import { RealDeviceBridge } from './services/realDeviceBridge';
-import { ActionStep, Attachment, AuditRecord, DeviceSettings, AIModelBrainId, UILayoutMode, BluetoothDeviceInfo } from './types';
+import { ActionStep, Attachment, AuditRecord, DeviceSettings, AIModelBrainId, UILayoutMode } from './types';
 
 export default function App() {
   // Mobile device state
@@ -52,17 +50,13 @@ export default function App() {
     batteryLevel: 88,
   });
 
-  // Real Mobile Connection & Bridge state
-  const [isRealMobileConnected, setIsRealMobileConnected] = useState<boolean>(false);
-  const [isRealMobileModalOpen, setIsRealMobileModalOpen] = useState<boolean>(false);
+  // Direct Mobile Connection state (Direct hardware connection - no bluetooth required)
+  const [isDirectMobileConnected, setIsDirectMobileConnected] = useState<boolean>(false);
+  const [isDirectModalOpen, setIsDirectModalOpen] = useState<boolean>(false);
   const [uiLayoutMode, setUILayoutMode] = useState<UILayoutMode>('auto');
 
-  // Bluetooth Mobile Link state
-  const [isBluetoothModalOpen, setIsBluetoothModalOpen] = useState<boolean>(false);
-  const [connectedBluetoothDevice, setConnectedBluetoothDevice] = useState<BluetoothDeviceInfo | null>(null);
-
-  // AI Brain & Multi-Model Core state
-  const [activeBrainId, setActiveBrainId] = useState<AIModelBrainId>('gemini-3.8-flash');
+  // AI Brain & Multi-Model Core state (All 14 Frontier Models)
+  const [activeBrainId, setActiveBrainId] = useState<AIModelBrainId>('gemini-2.5-flash');
   const [temperature, setTemperature] = useState<number>(0.2);
   const [isBrainModalOpen, setIsBrainModalOpen] = useState<boolean>(false);
 
@@ -114,7 +108,7 @@ export default function App() {
     });
 
     if (RealDeviceBridge.isMobileDevice()) {
-      setIsRealMobileConnected(true);
+      setIsDirectMobileConnected(true);
       // Read real battery
       RealDeviceBridge.getBatteryStatus().then((b) => {
         if (b) {
@@ -221,7 +215,7 @@ export default function App() {
       setInitialCallPayload(payloadToUse);
 
       // If user wants real hardware action or is on mobile, trigger real dialer
-      if (isRealMobileConnected && payloadToUse?.phoneNumber) {
+      if (isDirectMobileConnected && payloadToUse?.phoneNumber) {
         RealDeviceBridge.dial(payloadToUse.phoneNumber);
       }
     } else if (app.includes('message') || app.includes('whatsapp') || action.category === 'messaging') {
@@ -229,7 +223,7 @@ export default function App() {
       setInitialDraftPayload(payloadToUse);
 
       // If connected to real phone, trigger real SMS or WhatsApp
-      if (isRealMobileConnected && payloadToUse?.messageText) {
+      if (isDirectMobileConnected && payloadToUse?.messageText) {
         RealDeviceBridge.sendMessage(payloadToUse.recipient || '', payloadToUse.messageText, routedAppName);
       }
     } else if (app.includes('code') || app.includes('terminal') || action.category === 'coding') {
@@ -366,42 +360,24 @@ export default function App() {
               <span className="sm:hidden font-mono text-[10px]">Brain</span>
             </button>
 
-            {/* Bluetooth Mobile Link Button */}
+            {/* Direct Mobile Link Button (موبائل ڈائریکٹ کنکشن) */}
             <button
               onClick={() => {
                 soundFX.playTap();
-                setIsBluetoothModalOpen(true);
+                setIsDirectModalOpen(true);
               }}
               className={`px-2.5 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm ${
-                connectedBluetoothDevice
-                  ? 'bg-blue-950/90 border-blue-500/70 text-blue-300 ring-1 ring-blue-500/50 shadow-blue-500/20'
-                  : 'bg-gradient-to-r from-blue-900/60 to-cyan-900/60 hover:from-blue-800/80 hover:to-cyan-800/80 text-blue-200 border-blue-500/50'
+                isDirectMobileConnected
+                  ? 'bg-emerald-950/90 border-emerald-500/70 text-emerald-300 ring-1 ring-emerald-500/50 shadow-emerald-500/20'
+                  : 'bg-gradient-to-r from-emerald-900/60 to-teal-900/60 hover:from-emerald-800/80 hover:to-teal-800/80 text-emerald-200 border-emerald-500/50'
               }`}
-              title="Connect Mobile via Bluetooth (بلوٹوتھ سے کنیکٹ کریں)"
+              title="Direct Mobile Link (موبائل ڈائریکٹ کنکشن - بغیر بلوٹوتھ)"
             >
-              <Bluetooth className={`w-3.5 h-3.5 ${connectedBluetoothDevice ? 'text-blue-400 animate-pulse' : 'text-cyan-300'}`} />
+              <Smartphone className={`w-3.5 h-3.5 ${isDirectMobileConnected ? 'text-emerald-400 animate-pulse' : 'text-teal-300'}`} />
               <span className="hidden sm:inline">
-                {connectedBluetoothDevice ? `BT: ${connectedBluetoothDevice.name.slice(0, 10)}` : 'Bluetooth Link'}
+                {isDirectMobileConnected ? 'Direct Mobile Active' : 'Direct Mobile Link'}
               </span>
-              <span className="sm:hidden text-[10px]">{connectedBluetoothDevice ? 'BT On' : 'Bluetooth'}</span>
-            </button>
-
-            {/* Pair Real Mobile Button */}
-            <button
-              onClick={() => {
-                soundFX.playTap();
-                setIsRealMobileModalOpen(true);
-              }}
-              className={`px-2.5 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm ${
-                isRealMobileConnected
-                  ? 'bg-emerald-950/80 border-emerald-500/60 text-emerald-300'
-                  : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700'
-              }`}
-              title="Connect real physical phone"
-            >
-              <Smartphone className={`w-3.5 h-3.5 ${isRealMobileConnected ? 'text-emerald-400 animate-pulse' : 'text-slate-400'}`} />
-              <span className="hidden sm:inline">{isRealMobileConnected ? 'Phone Paired' : 'Connect Mobile'}</span>
-              <span className="sm:hidden text-[10px]">{isRealMobileConnected ? 'Paired' : 'Phone'}</span>
+              <span className="sm:hidden text-[10px]">{isDirectMobileConnected ? 'Direct Active' : 'Direct Mobile'}</span>
             </button>
 
             {/* GitHub & Vercel Deploy Button */}
@@ -553,23 +529,23 @@ export default function App() {
             </div>
           )}
 
-          {/* Bluetooth Quick Connect Link Bar */}
-          <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-950/70 via-slate-900 to-cyan-950/50 border border-blue-500/40 flex flex-wrap items-center justify-between gap-2 shadow-md">
+          {/* Direct Mobile Quick Connect Bar */}
+          <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-950/70 via-slate-900 to-teal-950/50 border border-emerald-500/40 flex flex-wrap items-center justify-between gap-2 shadow-md">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-blue-600/30 border border-blue-400/50 flex items-center justify-center text-blue-300">
-                <Bluetooth className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-xl bg-emerald-600/30 border border-emerald-400/50 flex items-center justify-center text-emerald-300">
+                <Smartphone className="w-4 h-4" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-xs font-bold text-white flex items-center gap-1.5 truncate">
-                  <span>Bluetooth Mobile Link (بلوٹوتھ کنیکٹ)</span>
-                  {connectedBluetoothDevice && (
-                    <span className="w-2 h-2 rounded-full bg-blue-400 animate-ping flex-shrink-0" />
+                  <span>Direct Mobile Link (براہِ راست موبائل کنکشن)</span>
+                  {isDirectMobileConnected && (
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping flex-shrink-0" />
                   )}
                 </div>
-                <div className="text-[11px] text-blue-300/80 font-mono truncate max-w-[210px] sm:max-w-none">
-                  {connectedBluetoothDevice
-                    ? `Connected: ${connectedBluetoothDevice.name} (${connectedBluetoothDevice.rssi} dBm)`
-                    : 'ایک کلک سے اپنے موبائل کو بلوٹوتھ سے جوڑیں'}
+                <div className="text-[11px] text-emerald-300/80 font-mono truncate max-w-[210px] sm:max-w-none">
+                  {isDirectMobileConnected
+                    ? 'Connected: Real Mobile Hardware Active (Dialer, SMS, GPS, Haptics)'
+                    : 'بغیر بلوٹوتھ اپنے موبائل سے براہِ راست جڑیں (QR یا ڈائریکٹ لنک)'}
                 </div>
               </div>
             </div>
@@ -578,12 +554,12 @@ export default function App() {
               type="button"
               onClick={() => {
                 soundFX.playTap();
-                setIsBluetoothModalOpen(true);
+                setIsDirectModalOpen(true);
               }}
-              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-extrabold text-xs shadow-md shadow-blue-600/30 transition-all active:scale-95 flex items-center gap-1.5 flex-shrink-0"
+              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-extrabold text-xs shadow-md shadow-emerald-600/30 transition-all active:scale-95 flex items-center gap-1.5 flex-shrink-0"
             >
-              <Bluetooth className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>{connectedBluetoothDevice ? 'Manage Link' : 'Connect Bluetooth'}</span>
+              <Smartphone className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>{isDirectMobileConnected ? 'Manage Mobile' : 'Connect Direct'}</span>
             </button>
           </div>
 
@@ -598,13 +574,13 @@ export default function App() {
           {/* Quick Action Presets */}
           <QuickActionPresets
             onSelectPreset={(promptText) => {
-              if (promptText.toLowerCase().includes('bluetooth')) {
-                setIsBluetoothModalOpen(true);
+              if (promptText.toLowerCase().includes('connect') || promptText.toLowerCase().includes('direct')) {
+                setIsDirectModalOpen(true);
               } else {
                 handleCommandSubmit(promptText, []);
               }
             }}
-            onOpenBluetoothModal={() => setIsBluetoothModalOpen(true)}
+            onOpenDirectMobileModal={() => setIsDirectModalOpen(true)}
           />
 
           {/* Action Execution History Timeline */}
@@ -699,40 +675,31 @@ export default function App() {
         onUpdateTemperature={setTemperature}
       />
 
-      <RealMobileModal
-        isOpen={isRealMobileModalOpen}
-        onClose={() => setIsRealMobileModalOpen(false)}
-        isRealMobileConnected={isRealMobileConnected}
-        onConnectRealMobile={() => setIsRealMobileConnected(true)}
-        uiLayoutMode={uiLayoutMode}
-        onSetUILayoutMode={setUILayoutMode}
-      />
-
-      <BluetoothModal
-        isOpen={isBluetoothModalOpen}
-        onClose={() => setIsBluetoothModalOpen(false)}
-        connectedDevice={connectedBluetoothDevice}
-        onDeviceConnected={(device) => {
-          setConnectedBluetoothDevice(device);
-          setIsRealMobileConnected(true);
-          setDeviceSettings((prev) => ({ ...prev, bluetooth: true }));
+      <DirectMobileModal
+        isOpen={isDirectModalOpen}
+        onClose={() => setIsDirectModalOpen(false)}
+        isDirectConnected={isDirectMobileConnected}
+        onConnectDirect={() => {
+          setIsDirectMobileConnected(true);
           const auditRec: AuditRecord = {
-            id: `aud_bt_${Date.now()}`,
+            id: `aud_direct_${Date.now()}`,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            actionTitle: `Bluetooth Mobile Connected: ${device.name}`,
+            actionTitle: 'Direct Mobile Hardware Linked',
             category: 'system_settings',
             targetApp: 'Settings',
-            permission: 'android.permission.BLUETOOTH_CONNECT',
+            permission: 'android.permission.DIRECT_MOBILE_BRIDGE',
             riskLevel: 'low',
             decision: 'authorized',
-            payloadSummary: `Paired via Web Bluetooth GATT BLE 5.4. Device ID: ${device.id}`,
+            payloadSummary: 'Physical mobile hardware connected directly (Battery, GPS, Dialer, SMS, Haptics).',
             executionStatus: 'success',
           };
           setAuditRecords((prev) => [auditRec, ...prev]);
         }}
-        onDeviceDisconnected={() => {
-          setConnectedBluetoothDevice(null);
+        onDisconnectDirect={() => {
+          setIsDirectMobileConnected(false);
         }}
+        uiLayoutMode={uiLayoutMode}
+        onSetUILayoutMode={setUILayoutMode}
       />
 
       <DeployModal

@@ -1,38 +1,45 @@
 import React from 'react';
-import { Phone, MessageSquare, Terminal, Globe, Camera, Settings, Folder, Sparkles, Bluetooth } from 'lucide-react';
+import { Phone, MessageSquare, Terminal, Globe, Camera, Settings, Folder, Sparkles, Smartphone, Brain } from 'lucide-react';
 import { soundFX } from '../../services/audioEffects';
 
 interface QuickActionPresetsProps {
   onSelectPreset: (promptText: string) => void;
-  onOpenBluetoothModal?: () => void;
+  onOpenDirectMobileModal?: () => void;
 }
 
 const PRESETS = [
   {
-    category: 'Bluetooth Link',
-    icon: Bluetooth,
-    color: 'hover:border-cyan-500/60 text-cyan-400',
-    title: 'Pair Bluetooth Mobile',
-    prompt: 'Connect to my mobile phone via Bluetooth link and synchronize root permissions',
-  },
-  {
-    category: 'Calling',
-    icon: Phone,
+    category: 'Direct Mobile',
+    icon: Smartphone,
     color: 'hover:border-emerald-500/60 text-emerald-400',
-    title: 'Call Mom',
-    prompt: "Call Mom on speakerphone and let her know I'll be 15 minutes late for dinner",
+    title: 'Direct Phone Connect',
+    prompt: 'Connect directly to my mobile smartphone hardware without bluetooth and verify root telemetry',
   },
   {
-    category: 'Messaging',
+    category: 'Roman Urdu (اردو)',
+    icon: Phone,
+    color: 'hover:border-teal-500/60 text-teal-400',
+    title: 'Call Ammi (امی کو کال)',
+    prompt: 'Ammi ko phone milao aur speakerphone on rakho',
+  },
+  {
+    category: 'Frontier AI Brain',
+    icon: Brain,
+    color: 'hover:border-purple-500/60 text-purple-400',
+    title: 'Multi-Brain Consensus',
+    prompt: 'Analyze system security and permissions using Multi-Brain Hive Consensus (Gemini + Claude + GPT)',
+  },
+  {
+    category: 'WhatsApp',
     icon: MessageSquare,
     color: 'hover:border-blue-500/60 text-blue-400',
-    title: 'WhatsApp Sarah',
-    prompt: 'Send WhatsApp message to Sarah Connor: "Aegis security audit passed with 100% human verification!"',
+    title: 'WhatsApp Dispatch',
+    prompt: 'Send WhatsApp message to team: "Aegis Mobile Direct Link is active with zero Bluetooth dropouts!"',
   },
   {
-    category: 'Coding',
+    category: 'Coding & Root',
     icon: Terminal,
-    color: 'hover:border-purple-500/60 text-purple-400',
+    color: 'hover:border-indigo-500/60 text-indigo-400',
     title: 'Run Python Script',
     prompt: 'Write and run a Python script to scan device environment, memory runway, and process status',
   },
@@ -41,35 +48,21 @@ const PRESETS = [
     icon: Globe,
     color: 'hover:border-amber-500/60 text-amber-400',
     title: 'Browse AI News',
-    prompt: 'Open web browser, search for "Gemini 3.8 Flash mobile autonomous capabilities" and extract key points',
+    prompt: 'Open web browser, search for "Frontier AI Mobile Agent capabilities" and summarize findings',
   },
   {
     category: 'Camera / Vision',
     icon: Camera,
     color: 'hover:border-rose-500/60 text-rose-400',
-    title: 'Camera Scan',
+    title: 'Camera Lens Scan',
     prompt: 'Activate high-res camera sensor, snap frame of the receipt and extract total sum and tax',
   },
   {
     category: 'Settings / Hardware',
     icon: Settings,
     color: 'hover:border-slate-400/60 text-slate-300',
-    title: 'Configure Radios',
+    title: 'Configure 5G & GPS',
     prompt: 'Turn on 5G Ultra-Wideband cellular and enable GPS location for high-precision navigation',
-  },
-  {
-    category: 'Multi-lingual',
-    icon: Sparkles,
-    color: 'hover:border-teal-500/60 text-teal-400',
-    title: 'Hindi (हिन्दी)',
-    prompt: 'मेरी माँ को कॉल लगाओ और स्पीकरफोन चालू करो',
-  },
-  {
-    category: 'Multi-lingual',
-    icon: Sparkles,
-    color: 'hover:border-indigo-500/60 text-indigo-400',
-    title: 'Spanish (Español)',
-    prompt: 'Busca en la web las últimas noticias de inteligencia artificial y haz un resumen',
   },
 ];
 

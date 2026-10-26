@@ -108,30 +108,96 @@ export interface FileItem {
 }
 
 export type AIModelBrainId =
+  // Google Gemini Frontier Suite
+  | 'gemini-2.5-flash'
+  | 'gemini-2.5-pro'
+  | 'gemini-2.5-flash-lite'
+  | 'gemini-2.0-thinking'
+  // OpenAI Suite
+  | 'gpt-4.5-omni'
+  | 'gpt-4o-mini'
+  | 'o3-mini'
+  // Anthropic Claude Suite
+  | 'claude-3.7-sonnet'
+  | 'claude-3.5-haiku'
+  // DeepSeek Suite
+  | 'deepseek-r1'
+  | 'deepseek-v3'
+  // Meta Llama Suite
+  | 'llama-3.3-70b'
+  // Consensus & Local
+  | 'hive-consensus'
+  | 'local-npu'
+  // Legacy aliases for backward compatibility
   | 'gemini-3.8-flash'
   | 'gemini-4-argon'
-  | 'gemini-3.1-flash-lite'
-  | 'local-npu';
+  | 'gemini-3.1-flash-lite';
+
+export type AIModelProvider =
+  | 'Google'
+  | 'OpenAI'
+  | 'Anthropic'
+  | 'DeepSeek'
+  | 'Meta'
+  | 'Consensus Hive'
+  | 'On-Device Edge';
 
 export interface AIModelBrainConfig {
   id: AIModelBrainId;
   name: string;
+  provider: AIModelProvider;
   tagline: string;
   badge: string;
   color: string;
-  latencyRating: 'Ultra-Fast (0-150ms)' | 'Fast (200-500ms)' | 'Deep Reasoning (1-3s)' | 'Instant (0ms Offline)';
-  reasoningLevel: 'Low' | 'Medium' | 'High' | 'Deep Thinking';
+  latencyRating: 'Ultra-Fast (0-150ms)' | 'Fast (150-400ms)' | 'Deep Reasoning (1-3s)' | 'Instant (0ms Offline)';
+  reasoningLevel: 'Low' | 'Medium' | 'High' | 'Deep Thinking' | 'Consensus Multi-Model';
   supportedModalities: string[];
   description: string;
+  iconName?: string;
 }
 
 export type DeviceMode = 'simulator' | 'real_mobile';
 export type UILayoutMode = 'auto' | 'mobile_fullscreen' | 'desktop_studio';
 
+export type DirectConnectionType =
+  | 'direct_mobile_browser' // Running directly on real phone browser / PWA
+  | 'qr_instant_sync'      // Scanned QR code with phone camera
+  | 'wifi_lan_bridge'      // Connected over local Wi-Fi / IP
+  | 'usb_adb_cable'        // Connected via USB cable / ADB web port
+  | 'standby';
+
+export interface DirectMobileState {
+  isConnected: boolean;
+  connectionType: DirectConnectionType;
+  deviceId: string;
+  deviceName: string;
+  deviceModel: string;
+  platform: string;
+  pairingPin: string;
+  batteryLevel?: number;
+  isCharging?: boolean;
+  latitude?: number;
+  longitude?: number;
+  networkType?: string;
+  screenWakeLockActive?: boolean;
+  lastPing: string;
+  capabilities: {
+    dialer: boolean;
+    sms: boolean;
+    whatsapp: boolean;
+    vibration: boolean;
+    geolocation: boolean;
+    battery: boolean;
+    camera: boolean;
+    speech: boolean;
+    shareSheet: boolean;
+  };
+}
+
 export interface BluetoothDeviceInfo {
   id: string;
   name: string;
-  rssi?: number; // dBm
+  rssi?: number;
   connected: boolean;
   batteryLevel?: number;
   services?: string[];
@@ -140,8 +206,7 @@ export interface BluetoothDeviceInfo {
 
 export interface RealMobileBridgeState {
   isConnected: boolean;
-  isBluetoothConnected: boolean;
-  bluetoothDevice?: BluetoothDeviceInfo | null;
+  connectionType: DirectConnectionType;
   deviceId: string;
   deviceName: string;
   pairingPin: string;
