@@ -1,0 +1,9 @@
+{
+  "name": "Aegis OmniAutomate - AI Mobile OS Controller",
+  "description": "Autonomous AI mobile automation system with full multimodal control, interactive device sandbox, and strict permission-gated execution for calls, messaging, coding, browsing, and apps.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
